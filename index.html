@@ -1194,26 +1194,18 @@
   // --------- LECTURE / ÉCRITURE VERS GOOGLE SHEETS ---------
   async function loadRdvFromServer() {
   try {
+    const params = new URLSearchParams();
+    params.append("action", "list");
+
     const res = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "list" })
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+      },
+      body: params.toString()
     });
 
-    console.log('Status:', res.status);
-
-    const raw = await res.text();
-    console.log('Réponse brute serveur :', raw);
-
-    let data;
-    try {
-      data = JSON.parse(raw);
-    } catch (err) {
-      console.error("Erreur de parsing JSON :", err);
-      showStatus("La réponse du serveur n'est pas un JSON valide.");
-      return;
-    }
-
+    const data = await res.json();
     if (data.ok) {
       rdvList = data.items || [];
       renderAppointments();
@@ -1223,7 +1215,7 @@
       showStatus("Erreur chargement BD : " + (data.error || ""));
     }
   } catch (e) {
-    console.error("Erreur fetch :", e);
+    console.error(e);
     showStatus("Erreur réseau avec la base commune.");
   }
 }
@@ -1401,15 +1393,27 @@
       centre
     };
 
-    try {
+       try {
+      const params = new URLSearchParams();
+      params.append("action", "create");
+      params.append("usagerNom", usagerNom);
+      params.append("usagerTel", usagerTel);
+      params.append("usagerEmail", usagerEmail);
+      params.append("motif", motif);
+      params.append("date", dateRdv);
+      params.append("heure", heureRdv);
+      params.append("duree", duree);
+      params.append("collegue", collegue);
+      params.append("centre", centre);
+
       const res = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "create",
-          ...newRdv
-        })
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        body: params.toString()
       });
+
       const data = await res.json();
       if (data.ok && data.item) {
         rdvList.push(data.item);
@@ -1424,7 +1428,7 @@
       console.error(err);
       showStatus("Erreur réseau : impossible d’enregistrer.");
     }
-  });
+
 
   // --------- ACTIONS SUR LA LISTE (EDIT / DELETE) ---------
   document
@@ -1442,26 +1446,85 @@
 
       if (action === "delete") {
         if (!confirm("Supprimer ce rendez-vous ?")) return;
-        try {
-          const res = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "delete", id })
-          });
-          const data = await res.json();
-          if (data.ok) {
-            rdvList = rdvList.filter(r => r.id !== id);
-            renderAppointments();
-            renderWeekView();
-            showStatus("🗑️ Rendez-vous supprimé (base commune).");
-          } else {
-            showStatus("Erreur suppression BD : " + (data.error || ""));
-          }
-        } catch (err) {
-          console.error(err);
-          showStatus("Erreur réseau : suppression impossible.");
+              try {
+        const params = new URLSearchParams();
+        params.append("action", "delete");
+        params.append("id", id);
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+          },
+          body: params.toString()
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          rdvList = rdvList.filter(r => r.id !== id);
+          renderAppointments();
+          renderWeekView();
+          showStatus("🗑️ Rendez-vous supprimé (base commune).");
+        } else {
+          showStatus("Erreur suppression BD : " + (data.error || ""));
         }
+      } catch (err) {
+        console.error(err);
+        showStatus("Erreur réseau : suppression impossible.");
       }
+      try {
+        const params = new URLSearchParams();
+        params.append("action", "delete");
+        params.append("id", id);
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+          },
+          body: params.toString()
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          rdvList = rdvList.filter(r => r.id !== id);
+          renderAppointments();
+          renderWeekView();
+          showStatus("🗑️ Rendez-vous supprimé (base commune).");
+        } else {
+          showStatus("Erreur suppression BD : " + (data.error || ""));
+        }
+      } catch (err) {
+        console.error(err);
+        showStatus("Erreur réseau : suppression impossible.");
+      }
+      try {
+        const params = new URLSearchParams();
+        params.append("action", "delete");
+        params.append("id", id);
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+          },
+          body: params.toString()
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          rdvList = rdvList.filter(r => r.id !== id);
+          renderAppointments();
+          renderWeekView();
+          showStatus("🗑️ Rendez-vous supprimé (base commune).");
+        } else {
+          showStatus("Erreur suppression BD : " + (data.error || ""));
+        }
+      } catch (err) {
+        console.error(err);
+        showStatus("Erreur réseau : suppression impossible.");
+      }
+
 
       if (action === "edit") {
         // on pré-remplit le formulaire
@@ -1476,12 +1539,19 @@
         document.getElementById("centre").value = rdv.centre || "";
 
         // on supprime l'ancien en base, il sera recréé à la validation
-        try {
+               try {
+          const params = new URLSearchParams();
+          params.append("action", "delete");
+          params.append("id", id);
+
           const res = await fetch(API_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "delete", id })
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+            },
+            body: params.toString()
           });
+
           const data = await res.json();
           if (data.ok) {
             rdvList = rdvList.filter(r => r.id !== id);
@@ -1491,6 +1561,7 @@
         } catch (err) {
           console.error(err);
         }
+
 
         showStatus("✏️ Rendez-vous chargé dans le formulaire.");
       }
@@ -1508,22 +1579,29 @@
 
       try {
         // on supprime un par un côté serveur
-        for (const rdv of rdvList) {
-          await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "delete", id: rdv.id })
-          });
-        }
-        rdvList = [];
-        renderAppointments();
-        renderWeekView();
-        showStatus("Tous les rendez-vous ont été supprimés (base commune).");
-      } catch (err) {
-        console.error(err);
-        showStatus("Erreur réseau pendant la suppression globale.");
+            try {
+      for (const rdv of rdvList) {
+        const params = new URLSearchParams();
+        params.append("action", "delete");
+        params.append("id", rdv.id);
+
+        await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+          },
+          body: params.toString()
+        });
       }
-    });
+      rdvList = [];
+      renderAppointments();
+      renderWeekView();
+      showStatus("Tous les rendez-vous ont été supprimés (base commune).");
+    } catch (err) {
+      console.error(err);
+      showStatus("Erreur réseau pendant la suppression globale.");
+    }
+
 
   // --------- TABS (LISTE / TOUT / SEMAINE / NOTES) ---------
   const appointmentsView = document.getElementById("appointmentsView");
