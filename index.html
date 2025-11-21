@@ -1193,26 +1193,41 @@
 
   // --------- LECTURE / ÉCRITURE VERS GOOGLE SHEETS ---------
   async function loadRdvFromServer() {
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "list" })
+    });
+
+    console.log('Status:', res.status);
+
+    const raw = await res.text();
+    console.log('Réponse brute serveur :', raw);
+
+    let data;
     try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "list" })
-      });
-      const data = await res.json();
-      if (data.ok) {
-        rdvList = data.items || [];
-        renderAppointments();
-        renderWeekView();
-        showStatus("🔄 Rendez-vous chargés depuis la base commune.");
-      } else {
-        showStatus("Erreur chargement BD : " + (data.error || ""));
-      }
-    } catch (e) {
-      console.error(e);
-      showStatus("Erreur réseau avec la base commune.");
+      data = JSON.parse(raw);
+    } catch (err) {
+      console.error("Erreur de parsing JSON :", err);
+      showStatus("La réponse du serveur n'est pas un JSON valide.");
+      return;
     }
+
+    if (data.ok) {
+      rdvList = data.items || [];
+      renderAppointments();
+      renderWeekView();
+      showStatus("🔄 Rendez-vous chargés depuis la base commune.");
+    } else {
+      showStatus("Erreur chargement BD : " + (data.error || ""));
+    }
+  } catch (e) {
+    console.error("Erreur fetch :", e);
+    showStatus("Erreur réseau avec la base commune.");
   }
+}
+
 
   // --------- AFFICHAGE LISTE RDV ---------
   function renderAppointments() {
