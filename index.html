@@ -1193,33 +1193,32 @@
 
   // --------- LECTURE / ÉCRITURE VERS GOOGLE SHEETS ---------
   async function loadRdvFromServer() {
-  try {
-    const params = new URLSearchParams();
-    params.append("action", "list");
+    try {
+      const params = new URLSearchParams();
+      params.append("action", "list");
 
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-      },
-      body: params.toString()
-    });
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        body: params.toString()
+      });
 
-    const data = await res.json();
-    if (data.ok) {
-      rdvList = data.items || [];
-      renderAppointments();
-      renderWeekView();
-      showStatus("🔄 Rendez-vous chargés depuis la base commune.");
-    } else {
-      showStatus("Erreur chargement BD : " + (data.error || ""));
+      const data = await res.json();
+      if (data.ok) {
+        rdvList = data.items || [];
+        renderAppointments();
+        renderWeekView();
+        showStatus("🔄 Rendez-vous chargés depuis la base commune.");
+      } else {
+        showStatus("Erreur chargement BD : " + (data.error || ""));
+      }
+    } catch (e) {
+      console.error(e);
+      showStatus("Erreur réseau avec la base commune.");
     }
-  } catch (e) {
-    console.error(e);
-    showStatus("Erreur réseau avec la base commune.");
   }
-}
-
 
   // --------- AFFICHAGE LISTE RDV ---------
   function renderAppointments() {
@@ -1381,19 +1380,7 @@
       return;
     }
 
-    const newRdv = {
-      usagerNom,
-      usagerTel,
-      usagerEmail,
-      motif,
-      date: dateRdv,
-      heure: heureRdv,
-      duree,
-      collegue,
-      centre
-    };
-
-       try {
+    try {
       const params = new URLSearchParams();
       params.append("action", "create");
       params.append("usagerNom", usagerNom);
@@ -1428,7 +1415,7 @@
       console.error(err);
       showStatus("Erreur réseau : impossible d’enregistrer.");
     }
-
+  });
 
   // --------- ACTIONS SUR LA LISTE (EDIT / DELETE) ---------
   document
@@ -1446,87 +1433,34 @@
 
       if (action === "delete") {
         if (!confirm("Supprimer ce rendez-vous ?")) return;
-              try {
-        const params = new URLSearchParams();
-        params.append("action", "delete");
-        params.append("id", id);
 
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-          },
-          body: params.toString()
-        });
+        try {
+          const params = new URLSearchParams();
+          params.append("action", "delete");
+          params.append("id", id);
 
-        const data = await res.json();
-        if (data.ok) {
-          rdvList = rdvList.filter(r => r.id !== id);
-          renderAppointments();
-          renderWeekView();
-          showStatus("🗑️ Rendez-vous supprimé (base commune).");
-        } else {
-          showStatus("Erreur suppression BD : " + (data.error || ""));
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+            },
+            body: params.toString()
+          });
+
+          const data = await res.json();
+          if (data.ok) {
+            rdvList = rdvList.filter(r => r.id !== id);
+            renderAppointments();
+            renderWeekView();
+            showStatus("🗑️ Rendez-vous supprimé (base commune).");
+          } else {
+            showStatus("Erreur suppression BD : " + (data.error || ""));
+          }
+        } catch (err) {
+          console.error(err);
+          showStatus("Erreur réseau : suppression impossible.");
         }
-      } catch (err) {
-        console.error(err);
-        showStatus("Erreur réseau : suppression impossible.");
-      }
-      try {
-        const params = new URLSearchParams();
-        params.append("action", "delete");
-        params.append("id", id);
-
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-          },
-          body: params.toString()
-        });
-
-        const data = await res.json();
-        if (data.ok) {
-          rdvList = rdvList.filter(r => r.id !== id);
-          renderAppointments();
-          renderWeekView();
-          showStatus("🗑️ Rendez-vous supprimé (base commune).");
-        } else {
-          showStatus("Erreur suppression BD : " + (data.error || ""));
-        }
-      } catch (err) {
-        console.error(err);
-        showStatus("Erreur réseau : suppression impossible.");
-      }
-      try {
-        const params = new URLSearchParams();
-        params.append("action", "delete");
-        params.append("id", id);
-
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-          },
-          body: params.toString()
-        });
-
-        const data = await res.json();
-        if (data.ok) {
-          rdvList = rdvList.filter(r => r.id !== id);
-          renderAppointments();
-          renderWeekView();
-          showStatus("🗑️ Rendez-vous supprimé (base commune).");
-        } else {
-          showStatus("Erreur suppression BD : " + (data.error || ""));
-        }
-      } catch (err) {
-        console.error(err);
-        showStatus("Erreur réseau : suppression impossible.");
-      }
-
-
-      if (action === "edit") {
+      } else if (action === "edit") {
         // on pré-remplit le formulaire
         document.getElementById("usagerNom").value = rdv.usagerNom;
         document.getElementById("usagerTel").value = rdv.usagerTel;
@@ -1539,7 +1473,7 @@
         document.getElementById("centre").value = rdv.centre || "";
 
         // on supprime l'ancien en base, il sera recréé à la validation
-               try {
+        try {
           const params = new URLSearchParams();
           params.append("action", "delete");
           params.append("id", id);
@@ -1562,7 +1496,6 @@
           console.error(err);
         }
 
-
         showStatus("✏️ Rendez-vous chargé dans le formulaire.");
       }
     });
@@ -1578,30 +1511,28 @@
       if (!confirm("Supprimer TOUS les rendez-vous ?")) return;
 
       try {
-        // on supprime un par un côté serveur
-            try {
-      for (const rdv of rdvList) {
-        const params = new URLSearchParams();
-        params.append("action", "delete");
-        params.append("id", rdv.id);
+        for (const rdv of rdvList) {
+          const params = new URLSearchParams();
+          params.append("action", "delete");
+          params.append("id", rdv.id);
 
-        await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-          },
-          body: params.toString()
-        });
+          await fetch(API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+            },
+            body: params.toString()
+          });
+        }
+        rdvList = [];
+        renderAppointments();
+        renderWeekView();
+        showStatus("Tous les rendez-vous ont été supprimés (base commune).");
+      } catch (err) {
+        console.error(err);
+        showStatus("Erreur réseau pendant la suppression globale.");
       }
-      rdvList = [];
-      renderAppointments();
-      renderWeekView();
-      showStatus("Tous les rendez-vous ont été supprimés (base commune).");
-    } catch (err) {
-      console.error(err);
-      showStatus("Erreur réseau pendant la suppression globale.");
-    }
-
+    });
 
   // --------- TABS (LISTE / TOUT / SEMAINE / NOTES) ---------
   const appointmentsView = document.getElementById("appointmentsView");
@@ -1629,7 +1560,7 @@
             renderAppointments();
             return;
           } else {
-            notesUnlocked = true; // plus de sessionStorage, mot de passe redemandé au reload
+            notesUnlocked = true;
             showStatus("🔓 Bloc-notes déverrouillé.");
           }
         }
