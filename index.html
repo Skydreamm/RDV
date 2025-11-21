@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Agenda Prise de Rendez-Vous - Lounis & collègues</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --primary: #1f6feb;
+      --primary-soft: #e3edff;
+      --accent: #ffb347;
+      --text: #1f2933;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --radius-lg: 18px;
+      --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.08);
+      --transition-fast: 0.15s ease-out;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top left, #dbeafe, #f9fafb 35%, #eef2ff);
+      min-height: 100vh;
+      padding: 24px;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    /* NAV */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+    }
+
+    .nav-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-title-main {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .nav-title-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 7px 12px;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background var(--transition-fast),
+        transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .nav-btn span.icon {
+      font-size: 1rem;
+    }
+
+    .nav-btn.active {
+      background: var(--primary-soft);
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    /* ACCUEIL */
+    #homePage {
+      margin-top: 8px;
+    }
+
+    .hero-card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 22px 20px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 20px;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .hero-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hero-text h1 {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.08);
+      color: #166534;
+      margin-bottom: 8px;
+    }
+
+    .hero-tag-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .hero-text p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .hero-list {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      padding-left: 16px;
+    }
+
+    .hero-list li {
+      margin-bottom: 4px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .hero-highlight {
+      font-size: 0.8rem;
+      color: #6b21a8;
+      background: #f3e8ff;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+
+    .hero-side {
+      position: relative;
+      padding: 10px;
+    }
+
+    .hero-bubble {
+      border-radius: 16px;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: white;
+      padding: 14px 14px 12px;
+      font-size: 0.9rem;
+      box-shadow: 0 14px 30px rgba(79, 70, 229, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bubble::after {
+      content: "";
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(59, 130, 246, 0.5);
+      filter: blur(10px);
+    }
+
+    .hero-bubble-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.96rem;
+      position: relative;
+    }
+
+    .hero-bubble ul {
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .hero-bubble li {
+      margin-bottom: 4px;
+    }
+
+    .hero-chip-stack {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      position: relative;
+    }
+
+    .hero-chip {
+      font-size: 0.75rem;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.3);
+      backdrop-filter: blur(6px);
+    }
+
+    .hero-note {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: #e5e7eb;
+      position: relative;
+    }
+
+    .hero-note strong {
+      font-weight: 600;
+    }
+
+    /* HEADER AGENDA */
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    h2.page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h2.page-title span.logo-pill {
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .tagline {
+      font-size: 0.85rem;
+      background: rgba(255, 179, 71, 0.08);
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: #92400e;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      width: fit-content;
+    }
+
+    .tagline-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #f59e0b;
+    }
+
+    .hero-info {
+      padding: 12px 16px;
+      background: rgba(31, 111, 235, 0.07);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(31, 111, 235, 0.15);
+      font-size: 0.9rem;
+      color: #1d4ed8;
+    }
+
+    .hero-info strong {
+      display: block;
+      font-size: 0.87rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 18px 18px 16px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title-badge {
+      font-size: 0.8rem;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    label span.hint {
+      font-weight: 400;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      margin-top: 4px;
+      outline: none;
+      background: #f9fafb;
+      transition: border var(--transition-fast), box-shadow var(--transition-fast),
+        background var(--transition-fast), transform var(--transition-fast);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+      transform: translateY(-1px);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .row > div {
+      flex: 1 1 0;
+      min-width: min(180px, 100%);
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 9px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+        background var(--transition-fast), opacity var(--transition-fast);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: white;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.4);
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.5);
+    }
+
+    button.secondary {
+      background: #f3f4f6;
+      color: #111827;
+      border: 1px solid #e5e7eb;
+    }
+
+    button.icon-only {
+      padding: 7px 9px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+
+    button.danger {
+      background: rgba(239, 68, 68, 0.06);
+      color: #b91c1c;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      box-shadow: none;
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .helper {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .helper-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 4px;
+      overflow-x: auto;
+    }
+
+    .tab {
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      color: var(--muted);
+      transition: background var(--transition-fast), color var(--transition-fast),
+        transform var(--transition-fast);
+    }
+
+    .tab.active {
+      background: var(--primary-soft);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .appointments-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .appointments-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      font-size: 0.78rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .appointments-list {
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin-top: 4px;
+    }
+
+    .appointments-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .appointments-list::-webkit-scrollbar-thumb {
+      background: #cbd5f5;
+      border-radius: 999px;
+    }
+
+    .day-block {
+      margin-bottom: 10px;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 8px 10px;
+    }
+
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      margin-bottom: 4px;
+      color: #4b5563;
+    }
+
+    .day-header span.date {
+      font-weight: 600;
+    }
+
+    .day-header span.count {
+      font-size: 0.76rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .rdv-card {
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      padding: 7px 8px;
+      margin-bottom: 6px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 6px 8px;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .rdv-time {
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .rdv-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .rdv-name {
+      font-weight: 600;
+    }
+
+    .rdv-meta {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .rdv-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .rdv-tag {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .rdv-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+    }
+
+    .empty-state {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding: 16px 8px 12px;
+    }
+
+    .empty-state span {
+      display: block;
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+
+    .note-area {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .note-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4338ca;
+    }
+
+    .status-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: #111827;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.4);
+      display: none;
+      z-index: 50;
+    }
+
+    .status-bar.show {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .pill-small {
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    /* CALENDRIER SEMAINE */
+    .week-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .week-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .week-nav {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 800px) {
+      .week-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 500px) {
+      .week-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .week-day {
+      background: #f9fafb;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      padding: 6px 6px 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 72px;
+    }
+
+    .week-day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 0.76rem;
+      margin-bottom: 2px;
+    }
+
+    .week-day-header span.date-small {
+      font-weight: 400;
+      color: #6b7280;
+      font-size: 0.7rem;
+    }
+
+    .week-day-body {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .week-slot {
+      background: #ffffff;
+      border-radius: 7px;
+      border: 1px solid #e5e7eb;
+      padding: 3px 4px;
+      line-height: 1.2;
+    }
+
+    .week-slot-time {
+      font-weight: 600;
+      font-size: 0.76rem;
+    }
+
+    .week-slot-name {
+      font-size: 0.75rem;
+    }
+
+    .week-slot-centre {
+      font-size: 0.7rem;
+      color: #4b5563;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- NAV -->
+  <div class="top-nav">
+    <div class="nav-left">
+      <div class="logo-badge">LU</div>
+      <div class="nav-title">
+        <div class="nav-title-main">Agenda Prise de Rendez-Vous</div>
+        <div class="nav-title-sub">Pour Lounis et ses collègues</div>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-btn active" data-page="home"><span class="icon">🏠</span> Accueil</button>
+      <button class="nav-btn" data-page="agenda"><span class="icon">📅</span> Accéder à l’agenda</button>
+    </div>
+  </div>
+
+  <!-- PAGE ACCUEIL -->
+  <div id="homePage">
+    <div class="hero-card">
+      <div class="hero-text">
+        <div class="hero-tag">
+          <span class="hero-tag-dot"></span>
+          Espace interne pour l’équipe
+        </div>
+        <h1>Prise de rendez-vous pour les usagers</h1>
+        <p>Les collègues notent et peuvent voir les rendez-vous, ensemble on gère le planning et les notes.</p>
+        <ul class="hero-list">
+          <li>✅ Choix du centre : Artois Champagne, Europe ou Neuville;</li>
+          <li>✅ Liste des rendez-vous + vue par semaine;</li>
+          <li>✅ Bloc-notes perso protégé par mot de passe.</li>
+        </ul>
+        <div class="hero-actions">
+          <button class="primary" data-page="agenda">🚀 Ouvrir l’agenda maintenant</button>
+          <span class="hero-highlight">Mot de passe bloc-notes : <strong>L1605S</strong></span>
+        </div>
+      </div>
+      <div class="hero-side">
+        <div class="hero-bubble">
+          <div class="hero-bubble-title">Comment l’utiliser ?</div>
+          <ul>
+            <li>Ouvre ce fichier sur le poste d’accueil;</li>
+            <li>Les collègues saisissent les RDV avec choix du centre;</li>
+            <li>Tu peux consulter la liste ou le calendrier semaine.</li>
+          </ul>
+          <div class="hero-chip-stack">
+            <span class="hero-chip">Données locales</span>
+            <span class="hero-chip">Export CSV</span>
+            <span class="hero-chip">Bloc-notes protégé</span>
+          </div>
+          <div class="hero-note">
+            <strong>Astuce :</strong> tu peux héberger ce fichier sur GitHub Pages ou un autre hébergeur.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE AGENDA -->
+  <div id="agendaPage" style="display:none;">
+    <header>
+      <div class="title-block">
+        <h2 class="page-title">
+          Agenda usagers
+          <span class="logo-pill">Espace collègues & Lounis</span>
+        </h2>
+        <p>Les collègues prennent les rendez-vous pour les usagers, nous gérons le planning, les centres et le bloc-notes.</p>
+        <div class="tagline">
+          <span class="tagline-dot"></span>
+          Données stockées dans ce navigateur (localStorage)
+        </div>
+      </div>
+      <div class="hero-info">
+        <strong>Vue rapide</strong>
+        Prochains rendez-vous triés par date & heure, avec vue “liste” ou “calendrier semaine”.
+      </div>
+    </header>
+
+    <main>
+      <!-- FORMULAIRE RDV -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            📅 Prendre un rendez-vous
+            <span class="card-title-badge">Collègues</span>
+          </div>
+        </div>
+        <p class="card-subtitle">Remplis ce formulaire quand un usager veut un créneau avec toi.</p>
+
+        <form id="rdv-form">
+          <div>
+            <label>Nom de l’usager <span class="hint">Obligatoire</span></label>
+            <input type="text" id="usagerNom" required />
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Contact (téléphone) <span class="hint">Optionnel</span></label>
+              <input type="tel" id="usagerTel" />
+            </div>
+            <div>
+              <label>Contact (e-mail) <span class="hint">Optionnel</span></label>
+              <input type="email" id="usagerEmail" />
+            </div>
+          </div>
+
+          <div>
+            <label>Motif du rendez-vous <span class="hint">Quelques mots</span></label>
+            <textarea id="motif"></textarea>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Date du rendez-vous <span class="hint">Obligatoire</span></label>
+              <input type="date" id="dateRdv" required />
+            </div>
+            <div>
+              <label>Heure <span class="hint">Obligatoire</span></label>
+              <input type="time" id="heureRdv" required />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Durée <span class="hint">Indicatif</span></label>
+              <select id="duree">
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60" selected>1 h</option>
+                <option value="90">1 h 30</option>
+              </select>
+            </div>
+            <div>
+              <label>Collègue qui a pris le RDV <span class="hint">Optionnel</span></label>
+              <input type="text" id="collegue" />
+            </div>
+          </div>
+
+          <div>
+            <label>Centre <span class="hint">Obligatoire</span></label>
+            <select id="centre" required>
+              <option value="">-- Choisir un centre --</option>
+              <option value="Artois Champagne">Artois Champagne</option>
+              <option value="Europe">Europe</option>
+              <option value="Neuville">Neuville</option>
+            </select>
+          </div>
+
+          <div class="form-footer">
+            <button type="submit" class="primary">➕ Enregistrer le rendez-vous</button>
+            <div class="helper">
+              <span class="helper-dot"></span>
+              Tu peux modifier ou supprimer un créneau ensuite.
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- LISTE RDV + NOTES + CALENDRIER -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            🗂️ Suivi des rendez-vous
+            <span class="card-title-badge">Vue Lounis</span>
+          </div>
+          <button id="clearAllBtn" class="danger icon-only" title="Supprimer tous les rendez-vous">🗑️</button>
+        </div>
+        <p class="card-subtitle">Vue liste, calendrier par semaine et bloc-notes personnel.</p>
+
+        <div class="tabs">
+          <button class="tab active" data-view="futur">À venir</button>
+          <button class="tab" data-view="tout">Tout (passé + à venir)</button>
+          <button class="tab" data-view="semaine">Calendrier semaine</button>
+          <button class="tab" data-view="notes">Bloc-notes perso</button>
+        </div>
+
+        <!-- Vue liste -->
+        <div id="appointmentsView">
+          <div class="appointments-header">
+            <h2>Prochains rendez-vous</h2>
+            <div class="chips">
+              <span class="chip" id="totalCountChip">0 RDV</span>
+              <button id="exportCsvBtn" class="secondary icon-only" title="Exporter en CSV">⬇️ CSV</button>
+            </div>
+          </div>
+          <div id="appointmentsList" class="appointments-list">
+            <div class="empty-state">
+              <span>🕊️</span>
+              Aucun rendez-vous pour l’instant.
+            </div>
+          </div>
+        </div>
+
+        <!-- Vue calendrier semaine -->
+        <div id="weekView" style="display:none;">
+          <div class="week-header">
+            <div class="week-title" id="weekTitle">Semaine</div>
+            <div class="week-nav">
+              <button class="secondary" id="prevWeekBtn">⬅️ Semaine précédente</button>
+              <button class="secondary" id="nextWeekBtn">Semaine suivante ➡️</button>
+            </div>
+          </div>
+          <div id="weekGrid" class="week-grid">
+            <!-- rempli en JS -->
+          </div>
+        </div>
+
+        <!-- Bloc-notes -->
+        <div id="notesView" style="display:none;">
+          <div class="card-subtitle">
+            Bloc-notes personnel (protégé par mot de passe).  
+            Contenu enregistré localement dans le navigateur.
+          </div>
+          <div class="note-area">
+            <textarea id="notesArea"></textarea>
+            <div class="note-footer">
+              <div><span class="pill">Bloc-notes de Lounis</span></div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <span id="notesStatus" class="pill-small">Non encore sauvegardé</span>
+                <button id="saveNotesBtn" class="secondary">💾 Sauvegarder</button>
+                <button id="clearNotesBtn" class="secondary">🧹 Vider</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <div id="statusBar" class="status-bar">
+    <span class="status-dot"></span>
+    <span id="statusText">Action réalisée.</span>
+  </div>
+</div>
+
+<script>
+  // URL de TON script Apps Script
+  const API_URL = "https://script.google.com/macros/s/AKfycbx784Q0r6vHRYvtPYfHH6oi9mkKH0XpG8qVNfqhYWMua8OgCU4mVQ0hFKAXWI7DwZHDeA/exec";
+
+  // Liste des rendez-vous (en mémoire, synchro avec la base commune)
+  let rdvList = [];
+
+  // Mot de passe du bloc-notes
+  const NOTE_PASSWORD = "L1605S";
+
+  // Notes : on reste en localStorage (normal, c’est perso)
+  const STORAGE_KEY_NOTES = "agenda_usagers_notes";
+
+  let currentTab = "futur";
+  let notesUnlocked = false;
+
+  // --------- OUTILS DATES / AFFICHAGE ---------
+  function startOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay();        // 0 = dimanche
+    const diff = (day + 6) % 7;    // 0 -> lundi
+    d.setDate(d.getDate() - diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+  let currentWeekStart = startOfWeek(new Date());
+
+  function showStatus(message) {
+    const bar = document.getElementById("statusBar");
+    const text = document.getElementById("statusText");
+    text.textContent = message;
+    bar.classList.add("show");
+    setTimeout(() => bar.classList.remove("show"), 2300);
+  }
+
+  function formatDateFR(dateStr) {
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString("fr-FR", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
+  }
+
+  function formatDateShort(d) {
+    return d.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit"
+    });
+  }
+
+  function formatDateRangeWeek(startDate) {
+    const end = new Date(startDate);
+    end.setDate(end.getDate() + 6);
+    return (
+      startDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }) +
+      " ➜ " +
+      end.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })
+    );
+  }
+
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function compareDateTime(a, b) {
+    const da = new Date(a.date + "T" + a.heure);
+    const db = new Date(b.date + "T" + b.heure);
+    return da - db;
+  }
+
+  function isPast(rdv) {
+    const now = new Date();
+    const d = new Date(rdv.date + "T" + rdv.heure);
+    return d.getTime() < now.getTime();
+  }
+
+  function groupByDate(list) {
+    const map = {};
+    list.forEach(r => {
+      if (!map[r.date]) map[r.date] = [];
+      map[r.date].push(r);
+    });
+    return map;
+  }
+
+  function dateToStr(d) {
+    const y = d.getFullYear();
+    const m = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    return `${y}-${m}-${day}`;
+  }
+
+  // --------- LECTURE / ÉCRITURE VERS GOOGLE SHEETS ---------
+  async function loadRdvFromServer() {
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "list" })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        rdvList = data.items || [];
+        renderAppointments();
+        renderWeekView();
+        showStatus("🔄 Rendez-vous chargés depuis la base commune.");
+      } else {
+        showStatus("Erreur chargement BD : " + (data.error || ""));
+      }
+    } catch (e) {
+      console.error(e);
+      showStatus("Erreur réseau avec la base commune.");
+    }
+  }
+
+  // --------- AFFICHAGE LISTE RDV ---------
+  function renderAppointments() {
+    const view = currentTab;
+    const container = document.getElementById("appointmentsList");
+    const totalCountChip = document.getElementById("totalCountChip");
+
+    let list = rdvList.slice().sort(compareDateTime);
+    if (view === "futur") {
+      list = list.filter(r => !isPast(r));
+    }
+
+    totalCountChip.textContent = list.length + " RDV" + (list.length > 1 ? "s" : "");
+
+    if (list.length === 0) {
+      container.innerHTML =
+        '<div class="empty-state"><span>🕊️</span>Aucun rendez-vous dans cette vue.</div>';
+      return;
+    }
+
+    const grouped = groupByDate(list);
+    const dates = Object.keys(grouped).sort();
+
+    let html = "";
+    dates.forEach(date => {
+      const rdvs = grouped[date].sort(compareDateTime);
+      html += '<div class="day-block">';
+      html +=
+        '<div class="day-header"><span class="date">' +
+        formatDateFR(date) +
+        '</span><span class="count">' +
+        rdvs.length +
+        " RDV</span></div>";
+
+      rdvs.forEach(rdv => {
+        const past = isPast(rdv);
+        html += '<div class="rdv-card" data-id="' + rdv.id + '"';
+        if (past && view === "tout") {
+          html += ' style="opacity:0.6; background:#f9fafb;"';
+        }
+        html += ">";
+
+        html += '<div class="rdv-time">' + rdv.heure + "</div>";
+        html += '<div class="rdv-main">';
+        html +=
+          '<div class="rdv-name">' + (rdv.usagerNom || "Usager sans nom") + "</div>";
+
+        html += '<div class="rdv-meta">';
+        if (rdv.usagerTel) html += "📞 " + rdv.usagerTel + " · ";
+        if (rdv.usagerEmail) html += "✉️ " + rdv.usagerEmail;
+        html += "</div>";
+
+        if (rdv.motif) {
+          html += '<div class="rdv-meta">📝 ' + rdv.motif + "</div>";
+        }
+
+        html += '<div class="rdv-tags">';
+        if (rdv.centre) {
+          html += '<span class="rdv-tag">Centre : ' + rdv.centre + "</span>";
+        }
+        html += '<span class="rdv-tag">Durée ~ ' + rdv.duree + " min</span>";
+        if (rdv.collegue) {
+          html += '<span class="rdv-tag">Collègue : ' + rdv.collegue + "</span>";
+        }
+        if (past && view === "tout") {
+          html +=
+            '<span class="rdv-tag" style="background:#fee2e2; color:#991b1b;">Passé</span>';
+        }
+        html += "</div>"; // rdv-tags
+        html += "</div>"; // rdv-main
+
+        html += '<div class="rdv-actions">';
+        html +=
+          '<button class="secondary icon-only" data-action="edit" title="Modifier ce rendez-vous">✏️</button>';
+        html +=
+          '<button class="danger icon-only" data-action="delete" title="Supprimer ce rendez-vous">🗑️</button>';
+        html += "</div>";
+
+        html += "</div>"; // rdv-card
+      });
+
+      html += "</div>"; // day-block
+    });
+
+    container.innerHTML = html;
+  }
+
+  // --------- AFFICHAGE CALENDRIER SEMAINE ---------
+  function renderWeekView() {
+    const weekTitleEl = document.getElementById("weekTitle");
+    const weekGrid = document.getElementById("weekGrid");
+
+    weekTitleEl.textContent = "Semaine : " + formatDateRangeWeek(currentWeekStart);
+
+    let html = "";
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(currentWeekStart);
+      d.setDate(d.getDate() + i);
+      const dateStr = dateToStr(d);
+
+      const dayRdvs = rdvList
+        .filter(r => r.date === dateStr)
+        .sort(compareDateTime);
+
+      html += '<div class="week-day">';
+      html += '<div class="week-day-header">';
+      html +=
+        "<span>" +
+        d.toLocaleDateString("fr-FR", { weekday: "short" }) +
+        "</span>";
+      html += '<span class="date-small">' + formatDateShort(d) + "</span>";
+      html += "</div>";
+      html += '<div class="week-day-body">';
+
+      if (dayRdvs.length === 0) {
+        html +=
+          '<span style="font-size:0.72rem; color:#9ca3af;">(aucun RDV)</span>';
+      } else {
+        dayRdvs.forEach(rdv => {
+          html += '<div class="week-slot">';
+          html += '<div class="week-slot-time">' + rdv.heure + "</div>";
+          html +=
+            '<div class="week-slot-name">' +
+            (rdv.usagerNom || "Usager") +
+            "</div>";
+          if (rdv.centre) {
+            html +=
+              '<div class="week-slot-centre">' + rdv.centre + "</div>";
+          }
+          html += "</div>";
+        });
+      }
+
+      html += "</div></div>"; // week-day-body + week-day
+    }
+
+    weekGrid.innerHTML = html;
+  }
+
+  // --------- FORMULAIRE : CRÉER UN RDV ---------
+  const form = document.getElementById("rdv-form");
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const usagerNom = document.getElementById("usagerNom").value.trim();
+    const usagerTel = document.getElementById("usagerTel").value.trim();
+    const usagerEmail = document.getElementById("usagerEmail").value.trim();
+    const motif = document.getElementById("motif").value.trim();
+    const dateRdv = document.getElementById("dateRdv").value;
+    const heureRdv = document.getElementById("heureRdv").value;
+    const duree = document.getElementById("duree").value;
+    const collegue = document.getElementById("collegue").value.trim();
+    const centre = document.getElementById("centre").value;
+
+    if (!usagerNom || !dateRdv || !heureRdv || !centre) {
+      showStatus(
+        "Merci de remplir au minimum nom, date, heure et centre."
+      );
+      return;
+    }
+
+    const newRdv = {
+      usagerNom,
+      usagerTel,
+      usagerEmail,
+      motif,
+      date: dateRdv,
+      heure: heureRdv,
+      duree,
+      collegue,
+      centre
+    };
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create",
+          ...newRdv
+        })
+      });
+      const data = await res.json();
+      if (data.ok && data.item) {
+        rdvList.push(data.item);
+        renderAppointments();
+        renderWeekView();
+        form.reset();
+        showStatus("✅ Rendez-vous enregistré dans la base commune.");
+      } else {
+        showStatus("Erreur enregistrement BD : " + (data.error || ""));
+      }
+    } catch (err) {
+      console.error(err);
+      showStatus("Erreur réseau : impossible d’enregistrer.");
+    }
+  });
+
+  // --------- ACTIONS SUR LA LISTE (EDIT / DELETE) ---------
+  document
+    .getElementById("appointmentsList")
+    .addEventListener("click", async function (e) {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      const card = btn.closest(".rdv-card");
+      if (!card) return;
+      const id = card.getAttribute("data-id");
+      const action = btn.getAttribute("data-action");
+
+      const rdv = rdvList.find(r => r.id === id);
+      if (!rdv) return;
+
+      if (action === "delete") {
+        if (!confirm("Supprimer ce rendez-vous ?")) return;
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "delete", id })
+          });
+          const data = await res.json();
+          if (data.ok) {
+            rdvList = rdvList.filter(r => r.id !== id);
+            renderAppointments();
+            renderWeekView();
+            showStatus("🗑️ Rendez-vous supprimé (base commune).");
+          } else {
+            showStatus("Erreur suppression BD : " + (data.error || ""));
+          }
+        } catch (err) {
+          console.error(err);
+          showStatus("Erreur réseau : suppression impossible.");
+        }
+      }
+
+      if (action === "edit") {
+        // on pré-remplit le formulaire
+        document.getElementById("usagerNom").value = rdv.usagerNom;
+        document.getElementById("usagerTel").value = rdv.usagerTel;
+        document.getElementById("usagerEmail").value = rdv.usagerEmail;
+        document.getElementById("motif").value = rdv.motif;
+        document.getElementById("dateRdv").value = rdv.date;
+        document.getElementById("heureRdv").value = rdv.heure;
+        document.getElementById("duree").value = rdv.duree;
+        document.getElementById("collegue").value = rdv.collegue || "";
+        document.getElementById("centre").value = rdv.centre || "";
+
+        // on supprime l'ancien en base, il sera recréé à la validation
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "delete", id })
+          });
+          const data = await res.json();
+          if (data.ok) {
+            rdvList = rdvList.filter(r => r.id !== id);
+            renderAppointments();
+            renderWeekView();
+          }
+        } catch (err) {
+          console.error(err);
+        }
+
+        showStatus("✏️ Rendez-vous chargé dans le formulaire.");
+      }
+    });
+
+  // --------- SUPPRIMER TOUS LES RDV ---------
+  document
+    .getElementById("clearAllBtn")
+    .addEventListener("click", async function () {
+      if (rdvList.length === 0) {
+        showStatus("Aucun rendez-vous à supprimer.");
+        return;
+      }
+      if (!confirm("Supprimer TOUS les rendez-vous ?")) return;
+
+      try {
+        // on supprime un par un côté serveur
+        for (const rdv of rdvList) {
+          await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "delete", id: rdv.id })
+          });
+        }
+        rdvList = [];
+        renderAppointments();
+        renderWeekView();
+        showStatus("Tous les rendez-vous ont été supprimés (base commune).");
+      } catch (err) {
+        console.error(err);
+        showStatus("Erreur réseau pendant la suppression globale.");
+      }
+    });
+
+  // --------- TABS (LISTE / TOUT / SEMAINE / NOTES) ---------
+  const appointmentsView = document.getElementById("appointmentsView");
+  const notesView = document.getElementById("notesView");
+  const weekView = document.getElementById("weekView");
+
+  document.querySelectorAll(".tab").forEach(tabBtn => {
+    tabBtn.addEventListener("click", function () {
+      const view = tabBtn.getAttribute("data-view");
+
+      document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+      tabBtn.classList.add("active");
+
+      if (view === "notes") {
+        if (!notesUnlocked) {
+          const entered = window.prompt("Mot de passe pour le bloc-notes :");
+          if (entered !== NOTE_PASSWORD) {
+            showStatus("❌ Mot de passe incorrect.");
+            document.querySelector('.tab[data-view="notes"]').classList.remove("active");
+            document.querySelector('.tab[data-view="futur"]').classList.add("active");
+            currentTab = "futur";
+            appointmentsView.style.display = "block";
+            notesView.style.display = "none";
+            weekView.style.display = "none";
+            renderAppointments();
+            return;
+          } else {
+            notesUnlocked = true; // plus de sessionStorage, mot de passe redemandé au reload
+            showStatus("🔓 Bloc-notes déverrouillé.");
+          }
+        }
+        currentTab = "notes";
+        appointmentsView.style.display = "none";
+        weekView.style.display = "none";
+        notesView.style.display = "block";
+      } else if (view === "semaine") {
+        currentTab = "semaine";
+        appointmentsView.style.display = "none";
+        notesView.style.display = "none";
+        weekView.style.display = "block";
+        renderWeekView();
+      } else {
+        currentTab = view;
+        appointmentsView.style.display = "block";
+        notesView.style.display = "none";
+        weekView.style.display = "none";
+        renderAppointments();
+      }
+    });
+  });
+
+  // --------- BLOC-NOTES ---------
+  function loadNotesFromStorage() {
+    return localStorage.getItem(STORAGE_KEY_NOTES) || "";
+  }
+  function saveNotesToStorage(text) {
+    localStorage.setItem(STORAGE_KEY_NOTES, text);
+  }
+
+  const notesArea = document.getElementById("notesArea");
+  const notesStatus = document.getElementById("notesStatus");
+
+  function refreshNotesStatus(saved) {
+    if (saved) {
+      notesStatus.textContent = "Sauvegardé";
+      notesStatus.style.background = "#dcfce7";
+      notesStatus.style.color = "#166534";
+    } else {
+      notesStatus.textContent = "Modifications non sauvegardées";
+      notesStatus.style.background = "#fef3c7";
+      notesStatus.style.color = "#92400e";
+    }
+  }
+
+  notesArea.value = loadNotesFromStorage();
+  if (notesArea.value) {
+    refreshNotesStatus(true);
+  }
+
+  notesArea.addEventListener("input", function () {
+    refreshNotesStatus(false);
+  });
+
+  document
+    .getElementById("saveNotesBtn")
+    .addEventListener("click", function () {
+      saveNotesToStorage(notesArea.value);
+      refreshNotesStatus(true);
+      showStatus("📝 Notes sauvegardées.");
+    });
+
+  document
+    .getElementById("clearNotesBtn")
+    .addEventListener("click", function () {
+      if (confirm("Vider entièrement le bloc-notes ?")) {
+        notesArea.value = "";
+        saveNotesToStorage("");
+        refreshNotesStatus(true);
+        showStatus("Bloc-notes vidé.");
+      }
+    });
+
+  // --------- EXPORT CSV ---------
+  document
+    .getElementById("exportCsvBtn")
+    .addEventListener("click", function () {
+      if (rdvList.length === 0) {
+        showStatus("Aucun rendez-vous à exporter.");
+        return;
+      }
+
+      const rows = [
+        [
+          "ID",
+          "Nom usager",
+          "Téléphone",
+          "Email",
+          "Motif",
+          "Date",
+          "Heure",
+          "Durée (min)",
+          "Collègue",
+          "Centre"
+        ]
+      ];
+
+      rdvList
+        .slice()
+        .sort(compareDateTime)
+        .forEach(r => {
+          rows.push([
+            r.id,
+            r.usagerNom,
+            r.usagerTel,
+            r.usagerEmail,
+            r.motif,
+            r.date,
+            r.heure,
+            r.duree,
+            r.collegue,
+            r.centre
+          ]);
+        });
+
+      const csv = rows
+        .map(row =>
+          row
+            .map(field => '"' + String(field || "").replace(/"/g, '""') + '"')
+            .join(";")
+        )
+        .join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const now = new Date();
+      const filename =
+        "export_rendez_vous_" +
+        now.getFullYear() +
+        pad(now.getMonth() + 1) +
+        pad(now.getDate()) +
+        ".csv";
+
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showStatus("⬇️ Export CSV généré.");
+    });
+
+  // --------- NAV ACCUEIL / AGENDA ---------
+  function switchPage(page) {
+    const home = document.getElementById("homePage");
+    const agenda = document.getElementById("agendaPage");
+
+    if (page === "agenda") {
+      home.style.display = "none";
+      agenda.style.display = "block";
+    } else {
+      home.style.display = "block";
+      agenda.style.display = "none";
+    }
+
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    const btn = document.querySelector('.nav-btn[data-page="' + page + '"]');
+    if (btn) btn.classList.add("active");
+  }
+
+  document
+    .querySelectorAll('[data-page="home"]')
+    .forEach(btn => btn.addEventListener("click", () => switchPage("home")));
+  document
+    .querySelectorAll('[data-page="agenda"]')
+    .forEach(btn => btn.addEventListener("click", () => switchPage("agenda")));
+
+  // --------- BOUTONS SEMAINE +/- ---------
+  document.getElementById("prevWeekBtn").addEventListener("click", function () {
+    currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+    renderWeekView();
+  });
+
+  document.getElementById("nextWeekBtn").addEventListener("click", function () {
+    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    renderWeekView();
+  });
+
+  // --------- INIT : CHARGEMENT DES DONNÉES COMMUNES ---------
+  loadRdvFromServer();
+</script>
+
+</body>
+</html>
