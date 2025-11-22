@@ -404,6 +404,14 @@
       margin-bottom: 12px;
     }
 
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+
     form {
       display: flex;
       flex-direction: column;
@@ -876,6 +884,11 @@
       <button class="nav-btn active" data-page="home"><span class="icon">🏠</span> Accueil</button>
       <button class="nav-btn" data-page="agenda"><span class="icon">📅</span> Accéder à l’agenda</button>
     </div>
+     <div class="nav-user">
+      <span id="userLabel" class="nav-title-sub">Non connecté</span>
+      <button id="loginBtn" class="nav-btn"><span class="icon">🔐</span> Se connecter</button>
+      <button id="logoutBtn" class="nav-btn" style="display:none;"><span class="icon">🚪</span> Se déconnecter</button>
+    </div>
   </div>
 
   <!-- PAGE ACCUEIL -->
@@ -997,6 +1010,22 @@
               <label>Collègue qui a pris le RDV <span class="hint">Optionnel</span></label>
               <input type="text" id="collegue" />
             </div>
+            <div class="row" id="recurrenceRow" style="display:none;">
+            <div>
+              <label>Récurrence (admin uniquement)</label>
+              <select id="recurrenceType">
+                <option value="none">Pas de récurrence</option>
+                <option value="daily">Tous les jours</option>
+                <option value="weekly">Chaque semaine (même jour)</option>
+                <option value="monthly">Chaque mois (même jour)</option>
+              </select>
+            </div>
+            <div>
+              <label>Nombre d'occurrences</label>
+              <input type="number" id="recurrenceCount" min="1" max="30" value="1" />
+            </div>
+          </div>
+
           </div>
 
           <div>
@@ -1101,6 +1130,17 @@
   // URL de TON script Apps Script
   const API_URL = "https://script.google.com/macros/s/AKfycbx784Q0r6vHRYvtPYfHH6oi9mkKH0XpG8qVNfqhYWMua8OgCU4mVQ0hFKAXWI7DwZHDeA/exec";
 
+  // 🔐 Comptes très simples (pour usage interne)
+  // Tu peux changer les identifiants/mots de passe ici
+  const USERS = {
+    "admin": { id: "admin", name: "Lounis (admin)", password: "ADMIN123", role: "admin" },
+    "accueil": { id: "accueil", name: "Accueil", password: "ACCUEIL123", role: "user" }
+  };
+
+  const STORAGE_KEY_USER = "agenda_usagers_user";
+
+  let currentUser = null;
+
   // Liste des rendez-vous (en mémoire, synchro avec la base commune)
   let rdvList = [];
 
@@ -1134,6 +1174,7 @@
 
   function formatDateFR(dateStr) {
     const d = new Date(dateStr + "T00:00:00");
+    if (isNaN(d.getTime())) return "Invalid Date";
     return d.toLocaleDateString("fr-FR", {
       weekday: "long",
       day: "2-digit",
@@ -1190,6 +1231,97 @@
     const day = pad(d.getDate());
     return `${y}-${m}-${day}`;
   }
+
+  // --------- GESTION UTILISATEUR (LOGIN) ---------
+  function saveUserToStorage(user) {
+    if (!user) {
+      localStorage.removeItem(STORAGE_KEY_USER);
+    } else {
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify({
+        id: user.id,
+        role: user.role
+      }));
+    }
+  }
+
+  function loadUserFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_USER);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const base = USERS[parsed.id];
+      if (!base) return null;
+      return { ...base };
+    } catch {
+      return null;
+    }
+  }
+
+  function updateUserUI() {
+    const userLabel = document.getElementById("userLabel");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const form = document.getElementById("rdv-form");
+    const recurrenceRow = document.getElementById("recurrenceRow");
+
+    if (!currentUser) {
+      userLabel.textContent = "Non connecté";
+      loginBtn.style.display = "inline-flex";
+      logoutBtn.style.display = "none";
+
+      // Formulaire désactivé
+      Array.from(form.elements).forEach(el => {
+        if (el.id !== "centre" && el.type !== "button" && el.type !== "submit") {
+          // on laisse juste la navigation
+        }
+      });
+
+      recurrenceRow.style.display = "none";
+    } else {
+      userLabel.textContent = currentUser.name + (currentUser.role === "admin" ? " (admin)" : "");
+      loginBtn.style.display = "none";
+      logoutBtn.style.display = "inline-flex";
+
+      // Récurrence visible seulement pour admin
+      recurrenceRow.style.display = currentUser.role === "admin" ? "flex" : "none";
+    }
+
+    renderAppointments(); // pour mettre à jour les droits sur les boutons
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    currentUser = loadUserFromStorage();
+    updateUserUI();
+
+    loginBtn.addEventListener("click", () => {
+      const id = prompt("Identifiant : (ex. admin ou accueil)");
+      if (!id) return;
+      const base = USERS[id];
+      if (!base) {
+        showStatus("Identifiant inconnu.");
+        return;
+      }
+      const pwd = prompt("Mot de passe pour " + id + " :");
+      if (pwd !== base.password) {
+        showStatus("Mot de passe incorrect.");
+        return;
+      }
+      currentUser = { ...base };
+      saveUserToStorage(currentUser);
+      updateUserUI();
+      showStatus("Connecté en tant que " + currentUser.name);
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      currentUser = null;
+      saveUserToStorage(null);
+      updateUserUI();
+      showStatus("Déconnecté.");
+    });
+  });
 
   // --------- LECTURE / ÉCRITURE VERS GOOGLE SHEETS ---------
   async function loadRdvFromServer() {
@@ -1255,6 +1387,12 @@
 
       rdvs.forEach(rdv => {
         const past = isPast(rdv);
+
+        const canEdit =
+          currentUser &&
+          (currentUser.role === "admin" ||
+            (rdv.ownerId && rdv.ownerId === currentUser.id));
+
         html += '<div class="rdv-card" data-id="' + rdv.id + '"';
         if (past && view === "tout") {
           html += ' style="opacity:0.6; background:#f9fafb;"';
@@ -1283,6 +1421,9 @@
         if (rdv.collegue) {
           html += '<span class="rdv-tag">Collègue : ' + rdv.collegue + "</span>";
         }
+        if (rdv.ownerId) {
+          html += '<span class="rdv-tag">Propriétaire : ' + rdv.ownerId + "</span>";
+        }
         if (past && view === "tout") {
           html +=
             '<span class="rdv-tag" style="background:#fee2e2; color:#991b1b;">Passé</span>';
@@ -1291,10 +1432,12 @@
         html += "</div>"; // rdv-main
 
         html += '<div class="rdv-actions">';
-        html +=
-          '<button class="secondary icon-only" data-action="edit" title="Modifier ce rendez-vous">✏️</button>';
-        html +=
-          '<button class="danger icon-only" data-action="delete" title="Supprimer ce rendez-vous">🗑️</button>';
+        if (canEdit) {
+          html +=
+            '<button class="secondary icon-only" data-action="edit" title="Modifier ce rendez-vous">✏️</button>';
+          html +=
+            '<button class="danger icon-only" data-action="delete" title="Supprimer ce rendez-vous">🗑️</button>';
+        }
         html += "</div>";
 
         html += "</div>"; // rdv-card
@@ -1358,10 +1501,15 @@
     weekGrid.innerHTML = html;
   }
 
-  // --------- FORMULAIRE : CRÉER UN RDV ---------
+  // --------- FORMULAIRE : CRÉER UN RDV (+ RÉCURRENCE ADMIN) ---------
   const form = document.getElementById("rdv-form");
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
+
+    if (!currentUser) {
+      showStatus("Merci de vous connecter avant de créer un rendez-vous.");
+      return;
+    }
 
     const usagerNom = document.getElementById("usagerNom").value.trim();
     const usagerTel = document.getElementById("usagerTel").value.trim();
@@ -1373,6 +1521,9 @@
     const collegue = document.getElementById("collegue").value.trim();
     const centre = document.getElementById("centre").value;
 
+    const recurrenceType = document.getElementById("recurrenceType").value;
+    const recurrenceCount = parseInt(document.getElementById("recurrenceCount").value || "1", 10);
+
     if (!usagerNom || !dateRdv || !heureRdv || !centre) {
       showStatus(
         "Merci de remplir au minimum nom, date, heure et centre."
@@ -1380,40 +1531,77 @@
       return;
     }
 
-    try {
-      const params = new URLSearchParams();
-      params.append("action", "create");
-      params.append("usagerNom", usagerNom);
-      params.append("usagerTel", usagerTel);
-      params.append("usagerEmail", usagerEmail);
-      params.append("motif", motif);
-      params.append("date", dateRdv);
-      params.append("heure", heureRdv);
-      params.append("duree", duree);
-      params.append("collegue", collegue);
-      params.append("centre", centre);
+    // Génération des dates en fonction de la récurrence
+    const dates = [dateRdv];
 
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-        },
-        body: params.toString()
-      });
-
-      const data = await res.json();
-      if (data.ok && data.item) {
-        rdvList.push(data.item);
-        renderAppointments();
-        renderWeekView();
-        form.reset();
-        showStatus("✅ Rendez-vous enregistré dans la base commune.");
-      } else {
-        showStatus("Erreur enregistrement BD : " + (data.error || ""));
+    if (currentUser.role === "admin" && recurrenceType !== "none" && recurrenceCount > 1) {
+      const base = new Date(dateRdv + "T00:00:00");
+      for (let i = 1; i < Math.min(recurrenceCount, 30); i++) {
+        const d = new Date(base);
+        if (recurrenceType === "daily") {
+          d.setDate(d.getDate() + i);
+        } else if (recurrenceType === "weekly") {
+          d.setDate(d.getDate() + 7 * i);
+        } else if (recurrenceType === "monthly") {
+          d.setMonth(d.getMonth() + i);
+        }
+        dates.push(dateToStr(d));
       }
-    } catch (err) {
-      console.error(err);
-      showStatus("Erreur réseau : impossible d’enregistrer.");
+    }
+
+    let okCount = 0;
+    let errorMsg = null;
+
+    for (const d of dates) {
+      try {
+        const params = new URLSearchParams();
+        params.append("action", "create");
+        params.append("usagerNom", usagerNom);
+        params.append("usagerTel", usagerTel);
+        params.append("usagerEmail", usagerEmail);
+        params.append("motif", motif);
+        params.append("date", d);
+        params.append("heure", heureRdv);
+        params.append("duree", duree);
+        params.append("collegue", collegue);
+        params.append("centre", centre);
+        params.append("ownerId", currentUser.id);
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+          },
+          body: params.toString()
+        });
+
+        const data = await res.json();
+        if (data.ok && data.item) {
+          rdvList.push(data.item);
+          okCount++;
+        } else {
+          errorMsg = data.error || "Erreur inconnue";
+          break;
+        }
+      } catch (err) {
+        console.error(err);
+        errorMsg = "Erreur réseau";
+        break;
+      }
+    }
+
+    renderAppointments();
+    renderWeekView();
+
+    if (okCount > 0) {
+      form.reset();
+      if (okCount === 1) {
+        showStatus("✅ Rendez-vous enregistré.");
+      } else {
+        showStatus("✅ " + okCount + " rendez-vous créés (récurrence).");
+      }
+    } else {
+      showStatus("Erreur enregistrement BD : " + (errorMsg || ""));
     }
   });
 
@@ -1430,6 +1618,16 @@
 
       const rdv = rdvList.find(r => r.id === id);
       if (!rdv) return;
+
+      const canEdit =
+        currentUser &&
+        (currentUser.role === "admin" ||
+          (rdv.ownerId && rdv.ownerId === currentUser.id));
+
+      if (!canEdit) {
+        showStatus("Tu ne peux modifier que tes propres rendez-vous.");
+        return;
+      }
 
       if (action === "delete") {
         if (!confirm("Supprimer ce rendez-vous ?")) return;
@@ -1504,6 +1702,11 @@
   document
     .getElementById("clearAllBtn")
     .addEventListener("click", async function () {
+      if (!currentUser || currentUser.role !== "admin") {
+        showStatus("Seul l’admin peut supprimer tous les rendez-vous.");
+        return;
+      }
+
       if (rdvList.length === 0) {
         showStatus("Aucun rendez-vous à supprimer.");
         return;
@@ -1655,7 +1858,8 @@
           "Heure",
           "Durée (min)",
           "Collègue",
-          "Centre"
+          "Centre",
+          "Propriétaire"
         ]
       ];
 
@@ -1673,7 +1877,8 @@
             r.heure,
             r.duree,
             r.collegue,
-            r.centre
+            r.centre,
+            r.ownerId || ""
           ]);
         });
 
@@ -1744,6 +1949,7 @@
   // --------- INIT : CHARGEMENT DES DONNÉES COMMUNES ---------
   loadRdvFromServer();
 </script>
+
 
 </body>
 </html>
