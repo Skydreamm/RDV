@@ -106,6 +106,7 @@
       color: var(--muted);
       text-align: center;
       margin-top: 10px;
+      /* volontairement vide pour ne pas afficher les mots de passe */
     }
 
     /* NAV */
@@ -930,6 +931,22 @@
       font-size: 0.7rem;
       color: #4b5563;
     }
+
+    /* 🎨 Couleurs par centre (liste + semaine) */
+    .centre-artois {
+      background: #ffe2e2 !important;
+      border-left: 4px solid #e11d48 !important;
+    }
+
+    .centre-europe {
+      background: #e0f2fe !important;
+      border-left: 4px solid #0284c7 !important;
+    }
+
+    .centre-neuville {
+      background: #dcfce7 !important;
+      border-left: 4px solid #16a34a !important;
+    }
   </style>
 </head>
 <body>
@@ -940,7 +957,7 @@
   <p>Identifiez-vous pour accéder à l’agenda.</p>
 
   <label for="loginUser">Identifiant</label>
-  <input type="text" id="loginUser" placeholder="admin ou accueil" />
+  <input type="text" id="loginUser" placeholder="Identifiant" />
 
   <label for="loginPass">Mot de passe</label>
   <input type="password" id="loginPass" placeholder="Mot de passe" />
@@ -951,7 +968,9 @@
 
   <p id="loginError">Identifiant ou mot de passe incorrect.</p>
 
-    <div class="login-hint" style="display:none;"></div>
+  <div class="login-hint">
+    <!-- volontairement vide pour ne pas afficher les identifiants -->
+  </div>
 </div>
 
 <div class="app" style="display:none;">
@@ -984,17 +1003,16 @@
           Espace interne pour l’équipe
         </div>
         <h1>Prise de rendez-vous pour les usagers</h1>
-        <p>Les collègues notent et peuvent voir les rendez-vous ainsi que modifier ceux qu'ils ont mis, ensemble on gère le planning.</p>
+        <p>Les collègues notent et peuvent voir les rendez-vous, ensemble on gère le planning et les notes.</p>
         <ul class="hero-list">
           <li>✅ Choix du centre : Artois Champagne, Europe ou Neuville;</li>
           <li>✅ Liste des rendez-vous + vue par semaine;</li>
           <li>✅ Bloc-notes perso protégé par mot de passe.</li>
         </ul>
-      <div class="hero-actions">
+        <div class="hero-actions">
           <button class="primary" data-page="agenda">🚀 Ouvrir l’agenda maintenant</button>
-          <!-- Mot de passe bloc-notes masqué -->
+          <!-- mot de passe bloc-notes non affiché volontairement -->
         </div>
-
       </div>
       <div class="hero-side">
         <div class="hero-bubble">
@@ -1005,12 +1023,12 @@
             <li>Tu peux consulter la liste ou le calendrier semaine.</li>
           </ul>
           <div class="hero-chip-stack">
-            <span class="hero-chip">Communication</span>
-            <span class="hero-chip">Rapidité</span>
+            <span class="hero-chip">Données partagées (Sheets)</span>
+            <span class="hero-chip">Export CSV</span>
             <span class="hero-chip">Bloc-notes protégé</span>
           </div>
           <div class="hero-note">
-            <strong> Un problème ? </strong>     Parles en à Lounis.
+            <strong>Astuce :</strong> tu peux héberger ce fichier sur GitHub Pages ou un autre hébergeur.
           </div>
         </div>
       </div>
@@ -1025,7 +1043,7 @@
           Agenda usagers
           <span class="logo-pill">Espace collègues & Lounis</span>
         </h2>
-        <p>Les collègues prennent les rendez-vous pour les usagers, nous gérons le planning, les centres.</p>
+        <p>Les collègues prennent les rendez-vous pour les usagers, nous gérons le planning, les centres et le bloc-notes.</p>
         <div class="tagline">
           <span class="tagline-dot"></span>
           Données stockées dans Google Sheets + bloc-notes en local
@@ -1046,7 +1064,7 @@
             <span class="card-title-badge">Collègues</span>
           </div>
         </div>
-        <p class="card-subtitle">Remplis ce formulaire quand un usager veut un créneau avec Lounis.</p>
+        <p class="card-subtitle">Remplis ce formulaire quand un usager veut un créneau avec toi.</p>
 
         <form id="rdv-form">
           <div>
@@ -1218,8 +1236,8 @@
 
   // 🔐 Comptes internes
   const USERS = {
-    "admin":   { id: "admin",   name: "Lounis ", password: "ADMIN123",   role: "admin" },
-    "accueil": { id: "accueil", name: "Accueil",        password: "ACCUEIL123", role: "user" }
+    "admin":   { id: "admin",   name: "Lounis",      password: "ADMIN123",   role: "admin" },
+    "accueil": { id: "accueil", name: "Accueil",     password: "ACCUEIL123", role: "user" }
   };
 
   const STORAGE_KEY_USER  = "agenda_usagers_user";
@@ -1308,6 +1326,15 @@
     const m = pad(d.getMonth() + 1);
     const day = pad(d.getDate());
     return `${y}-${m}-${day}`;
+  }
+
+  // ---- centre → classe couleur ----
+  function centreClass(c) {
+    if (!c) return "";
+    if (c === "Artois Champagne") return "centre-artois";
+    if (c === "Europe")            return "centre-europe";
+    if (c === "Neuville")          return "centre-neuville";
+    return "";
   }
 
   // --------- GESTION UTILISATEUR (LOGIN) ---------
@@ -1431,7 +1458,7 @@
           (currentUser.role === "admin" ||
             (rdv.ownerId && rdv.ownerId === currentUser.id));
 
-        html += '<div class="rdv-card" data-id="' + rdv.id + '"';
+        html += '<div class="rdv-card ' + centreClass(rdv.centre) + '" data-id="' + rdv.id + '"';
         if (past && view === "tout") {
           html += ' style="opacity:0.6; background:#f9fafb;"';
         }
@@ -1519,7 +1546,7 @@
           '<span style="font-size:0.72rem; color:#9ca3af;">(aucun RDV)</span>';
       } else {
         dayRdvs.forEach(rdv => {
-          html += '<div class="week-slot">';
+          html += '<div class="week-slot ' + centreClass(rdv.centre) + '">';
           html += '<div class="week-slot-time">' + rdv.heure + "</div>";
           html +=
             '<div class="week-slot-name">' +
