@@ -43,6 +43,71 @@
       margin: auto;
     }
 
+    /* ÉCRAN DE CONNEXION */
+    #loginScreen {
+      max-width: 360px;
+      width: 100%;
+      margin: auto;
+      margin-top: 60px;
+      background: #ffffff;
+      padding: 20px 18px 18px;
+      border-radius: 20px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    #loginScreen h2 {
+      text-align: center;
+      margin-bottom: 4px;
+      font-size: 1.4rem;
+    }
+
+    #loginScreen p {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    #loginScreen label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    #loginScreen input {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      outline: none;
+      background: #f9fafb;
+    }
+
+    #loginScreen input:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+    }
+
+    #loginError {
+      color: #b91c1c;
+      font-size: 0.85rem;
+      margin-top: 8px;
+      text-align: center;
+      display: none;
+    }
+
+    .login-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 10px;
+    }
+
     /* NAV */
     .top-nav {
       display: flex;
@@ -123,6 +188,13 @@
 
     .nav-btn:hover {
       transform: translateY(-1px);
+    }
+
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
     }
 
     /* ACCUEIL */
@@ -403,14 +475,6 @@
       color: var(--muted);
       margin-bottom: 12px;
     }
-
-    .nav-user {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
 
     form {
       display: flex;
@@ -869,7 +933,31 @@
   </style>
 </head>
 <body>
-<div class="app">
+
+<!-- ÉCRAN DE CONNEXION -->
+<div id="loginScreen">
+  <h2>Connexion</h2>
+  <p>Identifiez-vous pour accéder à l’agenda.</p>
+
+  <label for="loginUser">Identifiant</label>
+  <input type="text" id="loginUser" placeholder="admin ou accueil" />
+
+  <label for="loginPass">Mot de passe</label>
+  <input type="password" id="loginPass" placeholder="Mot de passe" />
+
+  <button id="loginSubmitBtn" class="primary" style="width:100%;justify-content:center;margin-top:4px;">
+    🔐 Se connecter
+  </button>
+
+  <p id="loginError">Identifiant ou mot de passe incorrect.</p>
+
+  <div class="login-hint">
+    Admin : <strong>admin / ADMIN123</strong><br/>
+    Accueil : <strong>accueil / ACCUEIL123</strong>
+  </div>
+</div>
+
+<div class="app" style="display:none;">
 
   <!-- NAV -->
   <div class="top-nav">
@@ -884,9 +972,8 @@
       <button class="nav-btn active" data-page="home"><span class="icon">🏠</span> Accueil</button>
       <button class="nav-btn" data-page="agenda"><span class="icon">📅</span> Accéder à l’agenda</button>
     </div>
-     <div class="nav-user">
+    <div class="nav-user">
       <span id="userLabel" class="nav-title-sub">Non connecté</span>
-      <button id="loginBtn" class="nav-btn"><span class="icon">🔐</span> Se connecter</button>
       <button id="logoutBtn" class="nav-btn" style="display:none;"><span class="icon">🚪</span> Se déconnecter</button>
     </div>
   </div>
@@ -920,7 +1007,7 @@
             <li>Tu peux consulter la liste ou le calendrier semaine.</li>
           </ul>
           <div class="hero-chip-stack">
-            <span class="hero-chip">Données locales</span>
+            <span class="hero-chip">Données partagées (Sheets)</span>
             <span class="hero-chip">Export CSV</span>
             <span class="hero-chip">Bloc-notes protégé</span>
           </div>
@@ -943,7 +1030,7 @@
         <p>Les collègues prennent les rendez-vous pour les usagers, nous gérons le planning, les centres et le bloc-notes.</p>
         <div class="tagline">
           <span class="tagline-dot"></span>
-          Données stockées dans ce navigateur (localStorage)
+          Données stockées dans Google Sheets + bloc-notes en local
         </div>
       </div>
       <div class="hero-info">
@@ -1010,7 +1097,10 @@
               <label>Collègue qui a pris le RDV <span class="hint">Optionnel</span></label>
               <input type="text" id="collegue" />
             </div>
-            <div class="row" id="recurrenceRow" style="display:none;">
+          </div>
+
+          <!-- RÉCURRENCE (admin uniquement) -->
+          <div class="row" id="recurrenceRow" style="display:none;">
             <div>
               <label>Récurrence (admin uniquement)</label>
               <select id="recurrenceType">
@@ -1024,8 +1114,6 @@
               <label>Nombre d'occurrences</label>
               <input type="number" id="recurrenceCount" min="1" max="30" value="1" />
             </div>
-          </div>
-
           </div>
 
           <div>
@@ -1042,7 +1130,7 @@
             <button type="submit" class="primary">➕ Enregistrer le rendez-vous</button>
             <div class="helper">
               <span class="helper-dot"></span>
-              Tu peux modifier ou supprimer un créneau ensuite.
+              Tu peux modifier ou supprimer un créneau ensuite (selon ton compte).
             </div>
           </div>
         </form>
@@ -1130,27 +1218,19 @@
   // URL de TON script Apps Script
   const API_URL = "https://script.google.com/macros/s/AKfycbx784Q0r6vHRYvtPYfHH6oi9mkKH0XpG8qVNfqhYWMua8OgCU4mVQ0hFKAXWI7DwZHDeA/exec";
 
-  // 🔐 Comptes très simples (pour usage interne)
-  // Tu peux changer les identifiants/mots de passe ici
+  // 🔐 Comptes internes
   const USERS = {
-    "admin": { id: "admin", name: "Lounis (admin)", password: "ADMIN123", role: "admin" },
-    "accueil": { id: "accueil", name: "Accueil", password: "ACCUEIL123", role: "user" }
+    "admin":   { id: "admin",   name: "Lounis (admin)", password: "ADMIN123",   role: "admin" },
+    "accueil": { id: "accueil", name: "Accueil",        password: "ACCUEIL123", role: "user" }
   };
 
-  const STORAGE_KEY_USER = "agenda_usagers_user";
+  const STORAGE_KEY_USER  = "agenda_usagers_user";
+  const STORAGE_KEY_NOTES = "agenda_usagers_notes";
+  const NOTE_PASSWORD     = "L1605S";
 
   let currentUser = null;
-
-  // Liste des rendez-vous (en mémoire, synchro avec la base commune)
-  let rdvList = [];
-
-  // Mot de passe du bloc-notes
-  const NOTE_PASSWORD = "L1605S";
-
-  // Notes : on reste en localStorage (normal, c’est perso)
-  const STORAGE_KEY_NOTES = "agenda_usagers_notes";
-
-  let currentTab = "futur";
+  let rdvList     = [];
+  let currentTab  = "futur";
   let notesUnlocked = false;
 
   // --------- OUTILS DATES / AFFICHAGE ---------
@@ -1172,9 +1252,13 @@
     setTimeout(() => bar.classList.remove("show"), 2300);
   }
 
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+
   function formatDateFR(dateStr) {
     const d = new Date(dateStr + "T00:00:00");
-    if (isNaN(d.getTime())) return "Invalid Date";
+    if (isNaN(d.getTime())) return dateStr || "Date invalide";
     return d.toLocaleDateString("fr-FR", {
       weekday: "long",
       day: "2-digit",
@@ -1198,10 +1282,6 @@
       " ➜ " +
       end.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })
     );
-  }
-
-  function pad(n) {
-    return String(n).padStart(2, "0");
   }
 
   function compareDateTime(a, b) {
@@ -1258,70 +1338,31 @@
   }
 
   function updateUserUI() {
-    const userLabel = document.getElementById("userLabel");
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const form = document.getElementById("rdv-form");
+    const userLabel   = document.getElementById("userLabel");
+    const logoutBtn   = document.getElementById("logoutBtn");
     const recurrenceRow = document.getElementById("recurrenceRow");
+    const clearAllBtn = document.getElementById("clearAllBtn");
 
     if (!currentUser) {
       userLabel.textContent = "Non connecté";
-      loginBtn.style.display = "inline-flex";
       logoutBtn.style.display = "none";
-
-      // Formulaire désactivé
-      Array.from(form.elements).forEach(el => {
-        if (el.id !== "centre" && el.type !== "button" && el.type !== "submit") {
-          // on laisse juste la navigation
-        }
-      });
-
       recurrenceRow.style.display = "none";
+      clearAllBtn.style.display = "none";
     } else {
       userLabel.textContent = currentUser.name + (currentUser.role === "admin" ? " (admin)" : "");
-      loginBtn.style.display = "none";
       logoutBtn.style.display = "inline-flex";
 
-      // Récurrence visible seulement pour admin
-      recurrenceRow.style.display = currentUser.role === "admin" ? "flex" : "none";
+      if (currentUser.role === "admin") {
+        recurrenceRow.style.display = "flex";
+        clearAllBtn.style.display   = "inline-flex";
+      } else {
+        recurrenceRow.style.display = "none";
+        clearAllBtn.style.display   = "none";
+      }
     }
 
-    renderAppointments(); // pour mettre à jour les droits sur les boutons
+    renderAppointments();
   }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    currentUser = loadUserFromStorage();
-    updateUserUI();
-
-    loginBtn.addEventListener("click", () => {
-      const id = prompt("Identifiant : (ex. admin ou accueil)");
-      if (!id) return;
-      const base = USERS[id];
-      if (!base) {
-        showStatus("Identifiant inconnu.");
-        return;
-      }
-      const pwd = prompt("Mot de passe pour " + id + " :");
-      if (pwd !== base.password) {
-        showStatus("Mot de passe incorrect.");
-        return;
-      }
-      currentUser = { ...base };
-      saveUserToStorage(currentUser);
-      updateUserUI();
-      showStatus("Connecté en tant que " + currentUser.name);
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      currentUser = null;
-      saveUserToStorage(null);
-      updateUserUI();
-      showStatus("Déconnecté.");
-    });
-  });
 
   // --------- LECTURE / ÉCRITURE VERS GOOGLE SHEETS ---------
   async function loadRdvFromServer() {
@@ -1387,7 +1428,6 @@
 
       rdvs.forEach(rdv => {
         const past = isPast(rdv);
-
         const canEdit =
           currentUser &&
           (currentUser.role === "admin" ||
@@ -1511,27 +1551,24 @@
       return;
     }
 
-    const usagerNom = document.getElementById("usagerNom").value.trim();
-    const usagerTel = document.getElementById("usagerTel").value.trim();
+    const usagerNom   = document.getElementById("usagerNom").value.trim();
+    const usagerTel   = document.getElementById("usagerTel").value.trim();
     const usagerEmail = document.getElementById("usagerEmail").value.trim();
-    const motif = document.getElementById("motif").value.trim();
-    const dateRdv = document.getElementById("dateRdv").value;
-    const heureRdv = document.getElementById("heureRdv").value;
-    const duree = document.getElementById("duree").value;
-    const collegue = document.getElementById("collegue").value.trim();
-    const centre = document.getElementById("centre").value;
+    const motif       = document.getElementById("motif").value.trim();
+    const dateRdv     = document.getElementById("dateRdv").value;
+    const heureRdv    = document.getElementById("heureRdv").value;
+    const duree       = document.getElementById("duree").value;
+    const collegue    = document.getElementById("collegue").value.trim();
+    const centre      = document.getElementById("centre").value;
 
-    const recurrenceType = document.getElementById("recurrenceType").value;
+    const recurrenceType  = document.getElementById("recurrenceType").value;
     const recurrenceCount = parseInt(document.getElementById("recurrenceCount").value || "1", 10);
 
     if (!usagerNom || !dateRdv || !heureRdv || !centre) {
-      showStatus(
-        "Merci de remplir au minimum nom, date, heure et centre."
-      );
+      showStatus("Merci de remplir au minimum nom, date, heure et centre.");
       return;
     }
 
-    // Génération des dates en fonction de la récurrence
     const dates = [dateRdv];
 
     if (currentUser.role === "admin" && recurrenceType !== "none" && recurrenceCount > 1) {
@@ -1659,18 +1696,17 @@
           showStatus("Erreur réseau : suppression impossible.");
         }
       } else if (action === "edit") {
-        // on pré-remplit le formulaire
-        document.getElementById("usagerNom").value = rdv.usagerNom;
-        document.getElementById("usagerTel").value = rdv.usagerTel;
+        // pré-remplissage
+        document.getElementById("usagerNom").value   = rdv.usagerNom;
+        document.getElementById("usagerTel").value   = rdv.usagerTel;
         document.getElementById("usagerEmail").value = rdv.usagerEmail;
-        document.getElementById("motif").value = rdv.motif;
-        document.getElementById("dateRdv").value = rdv.date;
-        document.getElementById("heureRdv").value = rdv.heure;
-        document.getElementById("duree").value = rdv.duree;
-        document.getElementById("collegue").value = rdv.collegue || "";
-        document.getElementById("centre").value = rdv.centre || "";
+        document.getElementById("motif").value       = rdv.motif;
+        document.getElementById("dateRdv").value     = rdv.date;
+        document.getElementById("heureRdv").value    = rdv.heure;
+        document.getElementById("duree").value       = rdv.duree;
+        document.getElementById("collegue").value    = rdv.collegue || "";
+        document.getElementById("centre").value      = rdv.centre || "";
 
-        // on supprime l'ancien en base, il sera recréé à la validation
         try {
           const params = new URLSearchParams();
           params.append("action", "delete");
@@ -1698,7 +1734,7 @@
       }
     });
 
-  // --------- SUPPRIMER TOUS LES RDV ---------
+  // --------- SUPPRIMER TOUS LES RDV (ADMIN) ---------
   document
     .getElementById("clearAllBtn")
     .addEventListener("click", async function () {
@@ -1739,8 +1775,8 @@
 
   // --------- TABS (LISTE / TOUT / SEMAINE / NOTES) ---------
   const appointmentsView = document.getElementById("appointmentsView");
-  const notesView = document.getElementById("notesView");
-  const weekView = document.getElementById("weekView");
+  const notesView        = document.getElementById("notesView");
+  const weekView         = document.getElementById("weekView");
 
   document.querySelectorAll(".tab").forEach(tabBtn => {
     tabBtn.addEventListener("click", function () {
@@ -1758,8 +1794,8 @@
             document.querySelector('.tab[data-view="futur"]').classList.add("active");
             currentTab = "futur";
             appointmentsView.style.display = "block";
-            notesView.style.display = "none";
-            weekView.style.display = "none";
+            notesView.style.display        = "none";
+            weekView.style.display         = "none";
             renderAppointments();
             return;
           } else {
@@ -1769,19 +1805,19 @@
         }
         currentTab = "notes";
         appointmentsView.style.display = "none";
-        weekView.style.display = "none";
-        notesView.style.display = "block";
+        weekView.style.display         = "none";
+        notesView.style.display        = "block";
       } else if (view === "semaine") {
         currentTab = "semaine";
         appointmentsView.style.display = "none";
-        notesView.style.display = "none";
-        weekView.style.display = "block";
+        notesView.style.display        = "none";
+        weekView.style.display         = "block";
         renderWeekView();
       } else {
         currentTab = view;
         appointmentsView.style.display = "block";
-        notesView.style.display = "none";
-        weekView.style.display = "none";
+        notesView.style.display        = "none";
+        weekView.style.display         = "none";
         renderAppointments();
       }
     });
@@ -1795,18 +1831,18 @@
     localStorage.setItem(STORAGE_KEY_NOTES, text);
   }
 
-  const notesArea = document.getElementById("notesArea");
+  const notesArea   = document.getElementById("notesArea");
   const notesStatus = document.getElementById("notesStatus");
 
   function refreshNotesStatus(saved) {
     if (saved) {
       notesStatus.textContent = "Sauvegardé";
       notesStatus.style.background = "#dcfce7";
-      notesStatus.style.color = "#166534";
+      notesStatus.style.color      = "#166534";
     } else {
       notesStatus.textContent = "Modifications non sauvegardées";
       notesStatus.style.background = "#fef3c7";
-      notesStatus.style.color = "#92400e";
+      notesStatus.style.color      = "#92400e";
     }
   }
 
@@ -1912,14 +1948,14 @@
 
   // --------- NAV ACCUEIL / AGENDA ---------
   function switchPage(page) {
-    const home = document.getElementById("homePage");
+    const home   = document.getElementById("homePage");
     const agenda = document.getElementById("agendaPage");
 
     if (page === "agenda") {
-      home.style.display = "none";
+      home.style.display   = "none";
       agenda.style.display = "block";
     } else {
-      home.style.display = "block";
+      home.style.display   = "block";
       agenda.style.display = "none";
     }
 
@@ -1946,10 +1982,59 @@
     renderWeekView();
   });
 
-  // --------- INIT : CHARGEMENT DES DONNÉES COMMUNES ---------
-  loadRdvFromServer();
-</script>
+  // --------- LOGIN ÉCRAN + LOGOUT ---------
+  const loginScreen = document.getElementById("loginScreen");
+  const appDiv      = document.querySelector(".app");
+  const loginBtn    = document.getElementById("loginSubmitBtn");
+  const loginError  = document.getElementById("loginError");
+  const logoutBtn   = document.getElementById("logoutBtn");
 
+  loginBtn.addEventListener("click", () => {
+    const user = document.getElementById("loginUser").value.trim();
+    const pass = document.getElementById("loginPass").value.trim();
+
+    const base = USERS[user];
+    if (base && base.password === pass) {
+      currentUser = { ...base };
+      saveUserToStorage(currentUser);
+      loginScreen.style.display = "none";
+      appDiv.style.display      = "block";
+      loginError.style.display  = "none";
+      updateUserUI();
+      loadRdvFromServer();
+      showStatus("👋 Bonjour " + currentUser.name);
+    } else {
+      loginError.style.display = "block";
+    }
+  });
+
+  logoutBtn.addEventListener("click", () => {
+    currentUser = null;
+    saveUserToStorage(null);
+    rdvList = [];
+    renderAppointments();
+    renderWeekView();
+    appDiv.style.display      = "none";
+    loginScreen.style.display = "block";
+    showStatus("Déconnecté.");
+  });
+
+  // --------- INIT : RECHARGER UTILISATEUR SI DÉJÀ CONNECTÉ ---------
+  (function init() {
+    const saved = loadUserFromStorage();
+    if (saved) {
+      currentUser = saved;
+      loginScreen.style.display = "none";
+      appDiv.style.display      = "block";
+      updateUserUI();
+      loadRdvFromServer();
+      showStatus("Reconnecté en tant que " + currentUser.name);
+    } else {
+      loginScreen.style.display = "block";
+      appDiv.style.display      = "none";
+    }
+  })();
+</script>
 
 </body>
 </html>
