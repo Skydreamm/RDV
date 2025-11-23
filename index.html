@@ -965,7 +965,15 @@
   <input type="text" id="loginUser" placeholder="Identifiant" />
 
   <label for="loginPass">Mot de passe</label>
+<div style="position:relative;">
   <input type="password" id="loginPass" placeholder="Mot de passe" />
+  <span id="togglePass" 
+        style="position:absolute; right:10px; top:50%; transform:translateY(-50%);
+               cursor:pointer; font-size:18px; color:#555;">
+    👁️
+  </span>
+</div>
+
 
   <button id="loginSubmitBtn" class="primary" style="width:100%;justify-content:center;margin-top:4px;">
     🔐 Se connecter
@@ -2072,6 +2080,18 @@
       loginScreen.style.display = "block";
       appDiv.style.display      = "none";
     }
+
+    document.getElementById("togglePass").addEventListener("click", function () {
+  const field = document.getElementById("loginPass");
+  if (field.type === "password") {
+    field.type = "text";
+    this.textContent = "🙈";   // œil barré
+  } else {
+    field.type = "password";
+    this.textContent = "👁️";  // œil normal
+  }
+});
+
   })();
 </script>
 
