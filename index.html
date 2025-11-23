@@ -1106,7 +1106,14 @@
                 <option value="30">30 min</option>
                 <option value="45">45 min</option>
                 <option value="60" selected>1 h</option>
+                <option value="75">1 h 15</option>
                 <option value="90">1 h 30</option>
+                <option value="105">1 h 45</option>
+                <option value="120">2 h</option>
+                <option value="150">2 h 30</option>
+                <option value="180">3 h</option>
+                <option value="210">3 h 30</option>
+                <option value="240">4 h 00</option>
               </select>
             </div>
             <div>
@@ -1135,10 +1142,11 @@
           <div>
             <label>Centre <span class="hint">Obligatoire</span></label>
             <select id="centre" required>
-              <option value="">-- Choisir un centre --</option>
+              <option value="">-- Choisir un Lieu --</option>
               <option value="Artois Champagne">Artois Champagne</option>
               <option value="Europe">Europe</option>
               <option value="Neuville">Neuville</option>
+              <option value="QuentinWeb">QuentinWeb</option>
             </select>
           </div>
 
@@ -1242,7 +1250,7 @@
 
   const STORAGE_KEY_USER  = "agenda_usagers_user";
   const STORAGE_KEY_NOTES = "agenda_usagers_notes";
-  const NOTE_PASSWORD     = "L1605S";
+  const NOTE_PASSWORD     = "L1604S";
 
   let currentUser = null;
   let rdvList     = [];
